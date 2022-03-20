@@ -6198,9 +6198,10 @@ bool MySQL_Session::handler___status_WAITING_CLIENT_DATA___STATE_SLEEP___MYSQL_C
 		current_hostgroup=qpo->destination_hostgroup;
 		return false;
 	}
-
+	
 	// handle case #1797
-	if ((pkt->size==SELECT_CONNECTION_ID_LEN+5 && strncasecmp((char *)SELECT_CONNECTION_ID,(char *)pkt->ptr+5,pkt->size-5)==0)) {
+	// handle case #2564 - do not intercept "SELECT CONNECTION_ID()" in COM_STMT_PREPARE
+	if ((pkt->size==SELECT_CONNECTION_ID_LEN+5 && (unsigned char)(pkt->ptr+4)!=0x16 && strncasecmp((char *)SELECT_CONNECTION_ID,(char *)pkt->ptr+5,pkt->size-5)==0)) {
 		char buf[32];
 		char buf2[32];
 		sprintf(buf,"%u",thread_session_id);
